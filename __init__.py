@@ -66,6 +66,28 @@ class TSUtilProperties(PropertyGroup):
     )
 
 # ------------------------------------------------------------------------
+#    Panel in Properties
+# ------------------------------------------------------------------------
+
+class PropertiesPanelUI(bpy.types.Panel):
+    """Creates a Panel in the scene context of the properties editor"""
+    bl_label = "TSUtils"
+    bl_idname = "tsutils.propertiespanel"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "scene"
+
+    def draw(self, context):
+        layout = self.layout
+
+        scene = context.scene
+        row = layout.row()
+        row.scale_y = 2.0
+        row.operator(Screenshot_OT_custom.bl_idname)
+
+
+
+# ------------------------------------------------------------------------
 #    Panel in Object Mode
 # ------------------------------------------------------------------------
 
@@ -126,6 +148,7 @@ class TSUtils_PT_panel_3(TSUtils_panel, bpy.types.Panel):
         box.prop(scn.tsutil_tool, "blendModeValue", text="Blend Mode")
         box.operator(SetBlendModes_OT_custom.bl_idname)
 
+        
 
 
 class ClearSplitNormals_OT_custom(bpy.types.Operator):
@@ -370,6 +393,33 @@ class SetBlendModes_OT_custom(bpy.types.Operator):
             self.report({"WARNING"}, "Nothing selected")
             return {'CANCELLED'}
 
+class Screenshot_OT_custom(bpy.types.Operator):
+    """Screenshot"""
+    bl_idname = "object.screenshot"
+    bl_label = "Take screenshots"
+
+    def execute(self, context):
+        if bpy.data.is_saved:
+            bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+            bpy.ops.screen.screenshot(filepath=bpy.path.abspath("//Screenshot_viewport.png"))
+            for area in bpy.context.workspace.screens[0].areas:
+                for space in area.spaces:
+                    if space.type == 'VIEW_3D':
+                        space.overlay.show_wireframes = True
+                        ctx = {
+                            "window": context.window, # current window, could also copy context
+                            "area": area, # our 3D View (the first found only actually)
+                            "region": None # just to suppress PyContext warning, doesn't seem to have any effect
+                        }
+                        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+                        bpy.ops.screen.screenshot_area(ctx, filepath=bpy.path.abspath("//Screenshot_wireframe.png"))
+                        space.overlay.show_wireframes = False
+                        self.report({"INFO"}, "Success")
+                        return {'FINISHED'}
+        else:
+            self.report({"WARNING"}, "Save the file first")
+            return {'CANCELLED'}
+
 def setMaterialValue(type, value, obj):
     for mat in obj.material_slots:
         for n in mat.material.node_tree.nodes:
@@ -383,6 +433,7 @@ def setMaterialValue(type, value, obj):
 
 classes = (
     TSUtilProperties,
+    PropertiesPanelUI,
     ClearSplitNormals_OT_custom,
     FlipNormals_OT_custom,
     NormalsOutside_OT_custom,
@@ -400,6 +451,7 @@ classes = (
     SetSpecular_OT_custom,
     SetRoughness_OT_custom,
     SetBlendModes_OT_custom,
+    Screenshot_OT_custom,
 )
 
 def register():
