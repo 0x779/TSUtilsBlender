@@ -22,6 +22,10 @@ Once installed, the addon is available in the n-panel. To use it, select the des
 
 ![tsutils](https://user-images.githubusercontent.com/1897654/195360733-cf5a86f1-fe6f-412a-8caa-871bfb04ff81.png)
 
+### Screenshots
+
+The addon can now take screenshots (viewport and wireframe) with the push of a button (located in the Properties panel). Just remember to first save your Blender file.
+
 ___
 
 ## Notes
