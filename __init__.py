@@ -98,6 +98,7 @@ class TSUtils_PT_panel_2(TSUtils_panel, bpy.types.Panel):
         box.operator(ClearSplitNormals_OT_custom.bl_idname)
         box.operator(FlipNormals_OT_custom.bl_idname)
         box.operator(NormalsOutside_OT_custom.bl_idname)
+        box.operator(ClearSharp_OT_custom.bl_idname)
         layout.label(text="Scene")
         box = layout.box()
         box.operator(SelectGeo_OT_custom.bl_idname)
@@ -183,6 +184,26 @@ class NormalsOutside_OT_custom(bpy.types.Operator):
                     bpy.ops.object.mode_set(mode='EDIT')
                     bpy.ops.mesh.select_all(action='SELECT')
                     bpy.ops.mesh.normals_make_consistent(inside=False)
+                    bpy.ops.object.mode_set(mode='OBJECT')
+            self.report({"INFO"}, "Success")
+            return {'FINISHED'}
+        else:
+            self.report({"WARNING"}, "Nothing selected")
+            return {'CANCELLED'}
+
+class ClearSharp_OT_custom(bpy.types.Operator):
+    """Clear all sharp edges for the selected object(s)"""
+    bl_idname = "object.clearsharp"
+    bl_label = "Clear all sharp edges"
+
+    def execute(self, context):
+        if (len(bpy.context.selected_objects) > 0):
+            for obj in bpy.context.selected_objects:
+                if obj.type == 'MESH':
+                    bpy.context.view_layer.objects.active = obj
+                    bpy.ops.object.mode_set(mode='EDIT')
+                    bpy.ops.mesh.select_all(action='SELECT')
+                    bpy.ops.mesh.mark_sharp(clear=True)
                     bpy.ops.object.mode_set(mode='OBJECT')
             self.report({"INFO"}, "Success")
             return {'FINISHED'}
@@ -365,6 +386,7 @@ classes = (
     ClearSplitNormals_OT_custom,
     FlipNormals_OT_custom,
     NormalsOutside_OT_custom,
+    ClearSharp_OT_custom,
     TSUtils_PT_panel_1,
     TSUtils_PT_panel_2,
     TSUtils_PT_panel_3,
