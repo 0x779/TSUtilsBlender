@@ -177,13 +177,12 @@ class FlipNormals_OT_custom(bpy.types.Operator):
     bl_label = "Flip Normals"
 
     def execute(self, context):
-        # Your code here 
-        # ...
         if (len(bpy.context.selected_objects) > 0):
             for obj in bpy.context.selected_objects:
                 if obj.type == 'MESH':
                     bpy.context.view_layer.objects.active = obj
                     bpy.ops.object.mode_set(mode='EDIT')
+                    bpy.ops.mesh.select_mode(type="FACE")
                     bpy.ops.mesh.select_all(action='SELECT')
                     bpy.ops.mesh.flip_normals()
                     bpy.ops.object.mode_set(mode='OBJECT')
@@ -205,6 +204,7 @@ class NormalsOutside_OT_custom(bpy.types.Operator):
                 if obj.type == 'MESH':
                     bpy.context.view_layer.objects.active = obj
                     bpy.ops.object.mode_set(mode='EDIT')
+                    bpy.ops.mesh.select_mode(type="FACE")
                     bpy.ops.mesh.select_all(action='SELECT')
                     bpy.ops.mesh.normals_make_consistent(inside=False)
                     bpy.ops.object.mode_set(mode='OBJECT')
@@ -225,6 +225,7 @@ class ClearSharp_OT_custom(bpy.types.Operator):
                 if obj.type == 'MESH':
                     bpy.context.view_layer.objects.active = obj
                     bpy.ops.object.mode_set(mode='EDIT')
+                    bpy.ops.mesh.select_mode(type="EDGE")
                     bpy.ops.mesh.select_all(action='SELECT')
                     bpy.ops.mesh.mark_sharp(clear=True)
                     bpy.ops.object.mode_set(mode='OBJECT')
