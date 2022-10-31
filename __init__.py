@@ -23,9 +23,6 @@ from bpy.props import (
 from bpy.types import (
                        PropertyGroup,
                        )
-import os
-
-inputPath = outputPath = inputFormat = outputFormat = ''
 
 
 # ------------------------------------------------------------------------
