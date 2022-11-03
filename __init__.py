@@ -410,7 +410,10 @@ class Screenshot_OT_custom(bpy.types.Operator):
                             "region": None # just to suppress PyContext warning, doesn't seem to have any effect
                         }
                         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
-                        bpy.ops.screen.screenshot_area(ctx, filepath=bpy.path.abspath("//Screenshot_wireframe.png"))
+                        if bpy.app.version > (3, 0, 0):
+                            bpy.ops.screen.screenshot_area(ctx, filepath=bpy.path.abspath("//Screenshot_wireframe.png"))
+                        else:
+                            bpy.ops.screen.screenshot(filepath=bpy.path.abspath("//Screenshot_wireframe.png"))  # Blender <2.83 doesn't support screenshot_area
                         space.overlay.show_wireframes = False
                         self.report({"INFO"}, "Success")
                         return {'FINISHED'}
