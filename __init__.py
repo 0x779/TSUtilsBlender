@@ -4,7 +4,7 @@ bl_info = {
     "name" : "TSUtils",
     "description" : "A collection of one-click utilities for general automation",
     "author" : "0x779",
-    "version" : (0, 0, 1),
+    "version" : (0, 0, 3),
     "blender" : (2, 80, 0),
     "location" : "View3D",
     "warning" : "",
@@ -45,6 +45,12 @@ class TSUtilProperties(PropertyGroup):
     )
     roughnessValue : FloatProperty(
         name="Roughness",
+        default=0.5,
+        max=1,
+        min=0,
+    )
+    emissionValue : FloatProperty(
+        name="Emissive strength",
         default=0.5,
         max=1,
         min=0,
@@ -112,6 +118,7 @@ class TSUtils_PT_panel_2(TSUtils_panel, bpy.types.Panel):
         box.operator(RemoveSubd_OT_custom.bl_idname)
         box.operator(Quadrify_OT_custom.bl_idname)
         box.operator(ApplyAllTransforms_OT_custom.bl_idname)
+        box.operator(ApplyAllModifiers_OT_custom.bl_idname)
         layout.label(text="Normals")
         box = layout.box()
         box.operator(ClearSplitNormals_OT_custom.bl_idname)
@@ -139,6 +146,8 @@ class TSUtils_PT_panel_3(TSUtils_panel, bpy.types.Panel):
         box.operator(SetSpecular_OT_custom.bl_idname)
         box.prop(context.scene.tsutil_tool, 'roughnessValue', slider=True)
         box.operator(SetRoughness_OT_custom.bl_idname)
+        box.prop(context.scene.tsutil_tool, 'emissionValue', slider=True)
+        box.operator(SetEmission_OT_custom.bl_idname)
 
         layout.label(text="Material settings")
         box = layout.box()
@@ -306,6 +315,28 @@ class ApplyAllTransforms_OT_custom(bpy.types.Operator):
         else:
             self.report({"WARNING"}, "Nothing selected")
             return {'CANCELLED'}
+        
+class ApplyAllModifiers_OT_custom(bpy.types.Operator):
+    """Apply all modifiers for the selected object(s)"""
+    bl_idname = "object.applymodifiers"
+    bl_label = "Apply all Modifiers"
+
+    def execute(self, context):
+        if (len(bpy.context.selected_objects) > 0):
+            for obj in bpy.context.selected_objects:
+                if obj.type == 'MESH':
+                    for m in obj.modifiers:
+                        try:
+                            bpy.context.view_layer.objects.active = obj
+                            bpy.ops.object.modifier_apply(modifier=m.name)
+                        except RuntimeError:
+                            print(f"Error applying {m.name} to {obj.name}, removing it instead.")
+                            obj.modifiers.remove(m)
+            self.report({"INFO"}, "Success")
+            return {'FINISHED'}
+        else:
+            self.report({"WARNING"}, "Nothing selected")
+            return {'CANCELLED'}
 
 class RemoveSubd_OT_custom(bpy.types.Operator):
     """Removes subdivision modifiers for the selected object(s)"""
@@ -341,6 +372,23 @@ class SetMetallic_OT_custom(bpy.types.Operator):
         else:
             self.report({"WARNING"}, "Nothing selected")
             return {'CANCELLED'}
+        
+class SetEmission_OT_custom(bpy.types.Operator):
+    """Set the emissive value for the selected object(s)"""
+    bl_idname = "object.emissionset"
+    bl_label = "Set Emission"
+
+    def execute(self, context):
+        if (len(bpy.context.selected_objects) > 0):
+            for obj in bpy.context.selected_objects:
+                if obj.type == 'MESH':  
+                    setMaterialValue('Emission Strength', context.scene.tsutil_tool.emissionValue, obj)
+            self.report({"INFO"}, "Success")
+            return {'FINISHED'}
+        else:
+            self.report({"WARNING"}, "Nothing selected")
+            return {'CANCELLED'}
+
 
 class SetSpecular_OT_custom(bpy.types.Operator):
     """Set the specular value for the selected object(s)"""
@@ -447,10 +495,12 @@ classes = (
     RemoveCams_OT_custom,
     RemoveLights_OT_custom,
     ApplyAllTransforms_OT_custom,
+    ApplyAllModifiers_OT_custom,
     RemoveSubd_OT_custom,
     SetMetallic_OT_custom,
     SetSpecular_OT_custom,
     SetRoughness_OT_custom,
+    SetEmission_OT_custom,
     SetBlendModes_OT_custom,
     Screenshot_OT_custom,
 )
