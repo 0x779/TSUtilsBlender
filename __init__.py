@@ -55,6 +55,12 @@ class TSUtilProperties(PropertyGroup):
         max=1,
         min=0,
     )
+    bumpValue : FloatProperty(
+        name="Bump strength",
+        default=0.15,
+        max=1,
+        min=0,
+    )
 
     blendModeValue: EnumProperty(
         items=(
@@ -148,6 +154,8 @@ class TSUtils_PT_panel_3(TSUtils_panel, bpy.types.Panel):
         box.operator(SetRoughness_OT_custom.bl_idname)
         box.prop(context.scene.tsutil_tool, 'emissionValue', slider=True)
         box.operator(SetEmission_OT_custom.bl_idname)
+        box.prop(context.scene.tsutil_tool, 'bumpValue', slider=True)
+        box.operator(SetBump_OT_custom.bl_idname)
 
         layout.label(text="Material settings")
         box = layout.box()
@@ -390,6 +398,23 @@ class SetEmission_OT_custom(bpy.types.Operator):
             return {'CANCELLED'}
 
 
+class SetBump_OT_custom(bpy.types.Operator):
+    """Set the bump value for the selected object(s)"""
+    bl_idname = "object.bumpset"
+    bl_label = "Set Bump"
+
+    def execute(self, context):
+        if (len(bpy.context.selected_objects) > 0):
+            for obj in bpy.context.selected_objects:
+                if obj.type == 'MESH':  
+                    setMaterialValue('BUMP', context.scene.tsutil_tool.bumpValue, obj)
+            self.report({"INFO"}, "Success")
+            return {'FINISHED'}
+        else:
+            self.report({"WARNING"}, "Nothing selected")
+            return {'CANCELLED'}
+
+
 class SetSpecular_OT_custom(bpy.types.Operator):
     """Set the specular value for the selected object(s)"""
     bl_idname = "object.specularset"
@@ -472,8 +497,10 @@ class Screenshot_OT_custom(bpy.types.Operator):
 def setMaterialValue(type, value, obj):
     for mat in obj.material_slots:
         for n in mat.material.node_tree.nodes:
-            if n.type == 'BSDF_PRINCIPLED':
+            if n.type == 'BSDF_PRINCIPLED' and not type == 'BUMP':
                 n.inputs[type].default_value = value
+            if n.type == 'BUMP' and type == 'BUMP':
+                n.inputs['Strength'].default_value = value  # Modify the strength value as desired
 
 
 # ------------------------------------------------------------------------
@@ -501,6 +528,7 @@ classes = (
     SetSpecular_OT_custom,
     SetRoughness_OT_custom,
     SetEmission_OT_custom,
+    SetBump_OT_custom,
     SetBlendModes_OT_custom,
     Screenshot_OT_custom,
 )
