@@ -288,8 +288,12 @@ class RemoveCams_OT_custom(bpy.types.Operator):
     bl_label = "Remove all cameras"
 
     def execute(self, context):
+        bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.context.scene.objects:
-            obj.select_set(obj.type == "CAMERA")
+            if obj.type == 'CAMERA':
+                obj.select_set(True)
+            else:
+                obj.select_set(False)
             bpy.ops.object.delete() 
         self.report({"INFO"}, "Success")
         return {'FINISHED'}
@@ -300,8 +304,12 @@ class RemoveLights_OT_custom(bpy.types.Operator):
     bl_label = "Remove all lights"
 
     def execute(self, context):
+        bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.context.scene.objects:
-            obj.select_set(obj.type == "LIGHT")
+            if obj.type == 'LIGHT':
+                obj.select_set(True)
+            else:
+                obj.select_set(False)
             bpy.ops.object.delete() 
         self.report({"INFO"}, "Success")
         return {'FINISHED'}
