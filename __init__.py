@@ -136,6 +136,7 @@ class TSUtils_PT_panel_2(TSUtils_panel, bpy.types.Panel):
         box.operator(SelectGeo_OT_custom.bl_idname)
         box.operator(RemoveCams_OT_custom.bl_idname)
         box.operator(RemoveLights_OT_custom.bl_idname)
+        box.operator(RemoveDupeMats_OT_custom.bl_idname)
 
 class TSUtils_PT_panel_3(TSUtils_panel, bpy.types.Panel):
     bl_parent_id = "TSUtils_PT_panel_1"
@@ -502,6 +503,64 @@ class Screenshot_OT_custom(bpy.types.Operator):
             self.report({"WARNING"}, "Save the file first")
             return {'CANCELLED'}
 
+class RemoveDupeMats_OT_custom(bpy.types.Operator):
+    """Remove duplicate materials"""
+    bl_idname = "object.removedupemats"
+    bl_label = "Remove duplicate materials"
+
+    def execute(self, context):
+        i = 0
+        while i < len(bpy.data.materials):
+            
+            og_material = bpy.data.materials[i]
+            
+            print("og material: " + og_material.name)
+            
+            # get duplicate materials
+            duplicate_materials = get_duplicate_materials(og_material)
+            
+            # replace all duplicates
+            for duplicate_material in duplicate_materials:
+                replace_material(duplicate_material, og_material)
+            
+            # adjust name to no trailing numbers
+            if og_material.name[-3:].isnumeric() and og_material.name[-4] == ".":
+                og_material.name = og_material.name[:-4]
+                
+            i = i+1
+        self.report({"INFO"}, "Success")
+        return {'FINISHED'}
+
+
+def replace_material(bad_mat, good_mat):
+    bad_mat.user_remap(good_mat)
+    bpy.data.materials.remove(bad_mat)
+    
+    
+def get_duplicate_materials(og_material):
+    
+    common_name = og_material.name
+    
+    if common_name[-3:].isnumeric():
+        common_name = common_name[:-4]
+    
+    duplicate_materials = []
+    
+    for material in bpy.data.materials:
+        if material is not og_material:
+            name = material.name
+            if name[-3:].isnumeric() and name[-4] == ".":
+                name = name[:-4]
+            
+            if name == common_name:
+                duplicate_materials.append(material)
+    
+    text = "{} duplicate materials found"
+    print(text.format(len(duplicate_materials)))
+    
+    return duplicate_materials
+
+
 def setMaterialValue(type, value, obj):
     for mat in obj.material_slots:
         for n in mat.material.node_tree.nodes:
@@ -529,6 +588,7 @@ classes = (
     SelectGeo_OT_custom,
     RemoveCams_OT_custom,
     RemoveLights_OT_custom,
+    RemoveDupeMats_OT_custom,
     ApplyAllTransforms_OT_custom,
     ApplyAllModifiers_OT_custom,
     RemoveSubd_OT_custom,
