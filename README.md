@@ -20,7 +20,8 @@ ___
 
 Once installed, the addon is available in the n-panel. To use it, select the desired object(s), then just [press buttons](https://media4.giphy.com/media/fsoCk5kgOcYMM/giphy.gif)
 
-![tsutils](https://user-images.githubusercontent.com/1897654/195360733-cf5a86f1-fe6f-412a-8caa-871bfb04ff81.png)
+![tsutilsblender](https://github.com/0x779/TSUtilsBlender/assets/1897654/bf3e750c-7d16-4eae-b4bc-c99bae3a3345)
+
 
 ### Screenshots
 
