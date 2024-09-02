@@ -493,7 +493,8 @@ class Screenshot_OT_custom(bpy.types.Operator):
                         }
                         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
                         if bpy.app.version > (3, 0, 0):
-                            bpy.ops.screen.screenshot_area(ctx, filepath=bpy.path.abspath("//Screenshot_wireframe.png"))
+                            with context.temp_override(**ctx): 
+                                bpy.ops.screen.screenshot_area(filepath=bpy.path.abspath("//Screenshot_wireframe.png"))
                         else:
                             bpy.ops.screen.screenshot(filepath=bpy.path.abspath("//Screenshot_wireframe.png"))  # Blender <2.83 doesn't support screenshot_area
                         space.overlay.show_wireframes = False
